@@ -1,5 +1,7 @@
 package com.gildedrose;
 
+import com.gildedrose.model.Item;
+import com.gildedrose.model.ItemConstants;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -102,5 +104,22 @@ class GildedRoseTest {
         GildedRose app = new GildedRose(items);
         app.updateQuality();
         assertEquals(18, items[0].quality); // drops by 2 instead of 1
+    }
+
+    @Test
+    void itemXDegrades5TimesAsFastAfterSellDate() {
+        Item[] items = new Item[]{new Item(ItemConstants.ITEM_X, 0, 20)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(15, items[0].quality); // drops by 5 instead of 1
+    }
+
+    @Test
+    void itemXDegradesByOneBeforeSellDate() {
+        Item[] items = new Item[]{new Item(ItemConstants.ITEM_X, 10, 20)};
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(9, items[0].sellIn);
+        assertEquals(19, items[0].quality);
     }
 }

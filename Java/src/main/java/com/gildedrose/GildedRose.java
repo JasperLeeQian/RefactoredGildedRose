@@ -1,7 +1,24 @@
 package com.gildedrose;
 
+import com.gildedrose.model.Item;
+import com.gildedrose.model.ItemConstants;
+import com.gildedrose.service.ItemUpdater;
+import com.gildedrose.service.updater.*;
+
+import java.util.Map;
+
 class GildedRose {
     Item[] items;
+
+    private static final Map<String, ItemUpdater> updaters = Map.of(
+        ItemConstants.AGED_BRIE, new AgedBrieUpdater(),
+        ItemConstants.SULFURAS, new SulfurasUpdater(),
+        ItemConstants.BACKSTAGE_PASS, new BackstagePassUpdater(),
+        ItemConstants.CONJURED, new ConjuredUpdater(),
+        ItemConstants.ITEM_X, new NewItemXUpdater()
+    );
+
+    private static final ItemUpdater defaultUpdater = new NormalItemUpdater();
 
     public GildedRose(Item[] items) {
         this.items = items;
@@ -9,58 +26,8 @@ class GildedRose {
 
     public void updateQuality() {
         for (Item item : items) {
-            switch (item.name) {
-                case ItemConstants.AGED_BRIE:
-                    updateAgedBrie(item);
-                    break;
-                case ItemConstants.SULFURAS:
-                    // legendary item, never changes
-                    break;
-                case ItemConstants.BACKSTAGE_PASS:
-                    updateBackstagePass(item);
-                    break;
-                case ItemConstants.CONJURED:
-                    updateConjured(item);
-                    break;
-                default:
-                    updateNormalItem(item);
-                    break;
-            }
+            updaters.getOrDefault(item.name, defaultUpdater).update(item);
         }
-    }
-
-    private void updateItem(Item item, int qualityChange) {
-        decrementSellIn(item);
-        item.quality = Math.min(50, Math.max(0, item.quality + qualityChange));
-    }
-
-    private void decrementSellIn(Item item) {
-        item.sellIn = item.sellIn - 1;
-    }
-
-    private void updateNormalItem(Item item) {
-        int change = item.sellIn <= 0 ? -2 : -1;
-        updateItem(item, change);
-    }
-
-    private void updateAgedBrie(Item item) {
-        int change = item.sellIn <= 0 ? 2 : 1;
-        updateItem(item, change);
-    }
-
-    private void updateBackstagePass(Item item) {
-        if (item.sellIn <= 0) {
-            decrementSellIn(item);
-            item.quality = 0;
-            return;
-        }
-        int change = item.sellIn <= 5 ? 3 : item.sellIn <= 10 ? 2 : 1;
-        updateItem(item, change);
-    }
-
-    private void updateConjured(Item item) {
-        int change = item.sellIn <= 0 ? -4 : -2;
-        updateItem(item, change);
     }
 }
 
